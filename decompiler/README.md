@@ -1,5 +1,7 @@
-# DecompilerMC
+# Decompiler based on DecompilerMC
+[5c93fa3](https://github.com/MaxPixelStudios/MinecraftDecompiler/commit/5c93fa3438d35a80794988dab53a29c953806bd1), This commit to be exact
 
+# DecompilerMC documentation
 ---
 **What is this for?**
 
@@ -45,7 +47,7 @@ Examples:
 
 ```bash
 
-usage: main.py [-h] [--mcversion MCVERSION] [--side SIDE] [--clean] [--force]
+usage: __init__.py [-h] [--mcversion MCVERSION] [--side SIDE] [--clean] [--force]
                [--forceno] [--decompiler DECOMPILER] [--nauto]
                [--download_mapping DOWNLOAD_MAPPING]
                [--remap_mapping [REMAP_MAPPING]]
