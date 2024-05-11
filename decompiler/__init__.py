@@ -1,5 +1,6 @@
 import glob
 import json
+import logging
 import os
 import random
 import shutil
@@ -36,7 +37,7 @@ def get_minecraft_path():
     elif sys.platform.startswith('darwin'):
         return Path("~/Library/Application Support/minecraft")
     else:
-        print("Cannot detect of version : %s. Please report to your closest sysadmin" % sys.platform)
+        logging.info("Cannot detect of version : %s. Please report to your closest sysadmin" % sys.platform)
         raise SystemExit(1)
 
 
@@ -94,7 +95,7 @@ def check_java():
             results.append(which('java', path='/opt'))
     results = [path for path in results if path is not None]
     if not results:
-        print('Java JDK is not installed ! Please install java JDK from https://java.oracle.com or OpenJDK')
+        logging.info('Java JDK is not installed ! Please install java JDK from https://java.oracle.com or OpenJDK')
         input("Aborting, press anything to exit")
         raise SystemExit(1)
 
@@ -102,7 +103,7 @@ def check_java():
 def get_global_manifest(quiet):
     if Path(f"./versions/version_manifest.json").exists() and Path(f"./versions/version_manifest.json").is_file():
         if not quiet:
-            print(
+            logging.info(
                 "Manifest already existing, not downloading again, if you want to please accept safe removal at beginning")
         return
     download_file(MANIFEST_LOCATION, f"./versions/version_manifest.json", quiet)
@@ -111,19 +112,19 @@ def get_global_manifest(quiet):
 def download_file(url, filename, quiet):
     try:
         if not quiet:
-            print(f'Downloading {filename}.')
+            logging.info(f'Downloading {filename}.')
         f = urllib.request.urlopen(url)
         with open(filename, 'wb+') as local_file:
             local_file.write(f.read())
     except HTTPError as e:
         if not quiet:
-            print('HTTP Error')
-            print(e)
+            logging.info('HTTP Error')
+            logging.info(e)
         raise SystemExit(1)
     except URLError as e:
         if not quiet:
-            print('URL Error')
-            print(e)
+            logging.info('URL Error')
+            logging.info(e)
         raise SystemExit(1)
 
 
@@ -147,7 +148,7 @@ def get_version_manifest(target_version, quiet):
     if Path(f"./versions/{target_version}/version.json").exists() and Path(
             f"./versions/{target_version}/version.json").is_file():
         if not quiet:
-            print(
+            logging.info(
                 "Version manifest already existing, not downloading again, if you want to please accept safe removal at beginning")
         return
     path_to_json = Path('./versions/version_manifest.json')
@@ -161,7 +162,7 @@ def get_version_manifest(target_version, quiet):
                     break
     else:
         if not quiet:
-            print('ERROR: Missing manifest file: version.json')
+            logging.error('ERROR: Missing manifest file: version.json')
             input("Aborting, press anything to exit")
         raise SystemExit(1)
 
@@ -180,7 +181,7 @@ def get_version_jar(target_version, side, quiet):
     if Path(f"./versions/{target_version}/{side}.jar").exists() and Path(
             f"./versions/{target_version}/{side}.jar").is_file():
         if not quiet:
-            print(f"versions/{target_version}/{side}.jar already existing, not downloading again")
+            logging.info(f"versions/{target_version}/{side}.jar already existing, not downloading again")
         return
     if path_to_json.exists() and path_to_json.is_file():
         path_to_json = path_to_json.resolve()
@@ -202,64 +203,64 @@ def get_version_jar(target_version, side, quiet):
                             if content is not None:
                                 element = content.split(b"\t")
                                 if len(element) != 3:
-                                    print(
+                                    logging.info(
                                         f"Jar should be extracted but version list is not in the correct format, expected 3 fields, got {len(element)} for {content}")
                                     raise SystemExit(1)
                                 version_hash = element[0].decode()
                                 version = element[1].decode()
                                 path = element[2].decode()
                                 if version != target_version and not quiet:
-                                    print(
+                                    logging.info(
                                         f"Warning, version is not identical to the one targeted got {version} exepected {target_version}")
                                 new_jar_path = f"./versions/{target_version}"
                                 try:
                                     new_jar_path = z.extract(f"META-INF/versions/{path}", new_jar_path)
                                 except Exception as e:
-                                    print(f"Could not extract to {new_jar_path} with error {e}")
+                                    logging.error(f"Could not extract to {new_jar_path} with error {e}")
                                     raise SystemExit(1)
                                 if Path(new_jar_path).exists():
                                     file_hash = sha256(new_jar_path)
                                     if file_hash != version_hash:
-                                        print(
+                                        logging.info(
                                             f"Extracted file hash and expected hash did not match up, got {file_hash} expected {version_hash}")
                                         raise SystemExit(1)
                                     try:
                                         shutil.move(new_jar_path, jar_path)
                                         shutil.rmtree(f"./versions/{target_version}/META-INF")
                                     except Exception as e:
-                                        print("Exception while removing the temp file", e)
+                                        logging.info("Exception while removing the temp file", e)
                                         raise SystemExit(1)
                                 else:
-                                    print(
+                                    logging.info(
                                         f"New {side} jar could not be extracted from archive at {new_jar_path}, failure")
                                     raise SystemExit(1)
                     else:
-                        print(f"Jar was maybe downloaded but not located, this is a failure, check path at {jar_path}")
+                        logging.info(f"Jar was maybe downloaded but not located, this is a failure, check path at {jar_path}")
                         raise SystemExit(1)
             else:
                 if not quiet:
-                    print("Could not download jar, missing fields")
+                    logging.info("Could not download jar, missing fields")
                     input("Aborting, press anything to exit")
                 raise SystemExit(1)
     else:
         if not quiet:
-            print('ERROR: Missing manifest file: version.json')
+            logging.error('ERROR: Missing manifest file: version.json')
             input("Aborting, press anything to exit")
         raise SystemExit(1)
     if not quiet:
-        print("Done !")
+        logging.info("Done !")
 
 
 def get_mappings(version, side, quiet):
     if Path(f'./mappings/{version}/{side}.txt').exists() and Path(f'./mappings/{version}/{side}.txt').is_file():
         if not quiet:
-            print(
+            logging.info(
                 "Mappings already existing, not downloading again, if you want to please accept safe removal at beginning")
         return
     path_to_json = Path(f'./versions/{version}/version.json')
     if path_to_json.exists() and path_to_json.is_file():
         if not quiet:
-            print(f'Found {version}.json')
+            logging.info(f'Found {version}.json')
         path_to_json = path_to_json.resolve()
         with open(path_to_json) as f:
             jfile = json.load(f)
@@ -269,30 +270,30 @@ def get_mappings(version, side, quiet):
                     url = url['client_mappings']['url']
                 else:
                     if not quiet:
-                        print(f'Error: Missing client mappings for {version}')
+                        logging.error(f'Error: Missing client mappings for {version}')
             elif side == SERVER:  # server
                 if url['server_mappings']:
                     url = url['server_mappings']['url']
                 else:
                     if not quiet:
-                        print(f'Error: Missing server mappings for {version}')
+                        logging.error(f'Error: Missing server mappings for {version}')
             else:
                 if not quiet:
-                    print('ERROR, type not recognized')
+                    logging.error('ERROR, type not recognized')
                 raise SystemExit(1)
             if not quiet:
-                print(f'Downloading the mappings for {version}..')
+                logging.info(f'Downloading the mappings for {version}..')
             download_file(url, f'./mappings/{version}/{"client" if side == CLIENT else "server"}.txt', quiet)
     else:
         if not quiet:
-            print('ERROR: Missing manifest file: version.json')
+            logging.error('ERROR: Missing manifest file: version.json')
             input("Aborting, press anything to exit")
         raise SystemExit(1)
 
 
 def remap(version, side, quiet):
     if not quiet:
-        print('=== Remapping jar using SpecialSource ====')
+        logging.info('=== Remapping jar using SpecialSource ====')
     t = time.time()
     path = Path(f'./versions/{version}/{side}.jar')
     # that part will not be assured by arguments
@@ -317,12 +318,12 @@ def remap(version, side, quiet):
                         "--kill-lvt"  # kill snowmen
                         ], check=True, capture_output=quiet)
         if not quiet:
-            print(f'- New -> {version}-{side}-temp.jar')
+            logging.info(f'- New -> {version}-{side}-temp.jar')
             t = time.time() - t
-            print('Done in %.1fs' % t)
+            logging.info('Done in %.1fs' % t)
     else:
         if not quiet:
-            print(
+            logging.error(
                 f'ERROR: Missing files: ./lib/SpecialSource-{SPECIAL_SOURCE_VERSION}.jar or mappings/{version}/{side}.tsrg or versions/{version}/{side}.jar')
             input("Aborting, press anything to exit")
         raise SystemExit(1)
@@ -330,7 +331,7 @@ def remap(version, side, quiet):
 
 def decompile_fern_flower(decompiled_version, version, side, quiet, force):
     if not quiet:
-        print('=== Decompiling using FernFlower (silent) ===')
+        logging.info('=== Decompiling using FernFlower (silent) ===')
     t = time.time()
     path = Path(f'{SRC_DIR}/{version}-{side}-temp.jar')
     fernflower = Path('./lib/fernflower.jar')
@@ -350,33 +351,33 @@ def decompile_fern_flower(decompiled_version, version, side, quiet, force):
                         path.__str__(), f'{SRC_DIR}/{decompiled_version}/{side}'
                         ], check=True, capture_output=quiet)
         if not quiet:
-            print(f'- Removing -> {version}-{side}-temp.jar')
+            logging.info(f'- Removing -> {version}-{side}-temp.jar')
         os.remove(f'{SRC_DIR}/{version}-{side}-temp.jar')
         if not quiet:
-            print("Decompressing remapped jar to directory")
+            logging.info("Decompressing remapped jar to directory")
         with zipfile.ZipFile(f'{SRC_DIR}/{decompiled_version}/{side}/{version}-{side}-temp.jar') as z:
             z.extractall(path=f'{SRC_DIR}/{decompiled_version}/{side}')
         t = time.time() - t
         if not quiet:
-            print(f'Done in %.1fs (file was decompressed in {decompiled_version}/{side})' % t)
-            print('Remove Extra Jar file? (y/n): ')
+            logging.info(f'Done in %.1fs (file was decompressed in {decompiled_version}/{side})' % t)
+            logging.info('Remove Extra Jar file? (y/n): ')
             response = input() or "y"
             if response == 'y':
-                print(f'- Removing -> {decompiled_version}/{side}/{version}-{side}-temp.jar')
+                logging.info(f'- Removing -> {decompiled_version}/{side}/{version}-{side}-temp.jar')
                 os.remove(f'{SRC_DIR}/{decompiled_version}/{side}/{version}-{side}-temp.jar')
         if force:
             os.remove(f'{SRC_DIR}/{decompiled_version}/{side}/{version}-{side}-temp.jar')
 
     else:
         if not quiet:
-            print(f'ERROR: Missing files: ./lib/fernflower.jar or {SRC_DIR}/{version}-{side}-temp.jar')
+            logging.error(f'ERROR: Missing files: ./lib/fernflower.jar or {SRC_DIR}/{version}-{side}-temp.jar')
             input("Aborting, press anything to exit")
         raise SystemExit(1)
 
 
 def decompile_cfr(decompiled_version, version, side, quiet):
     if not quiet:
-        print('=== Decompiling using CFR (silent) ===')
+        logging.info('=== Decompiling using CFR (silent) ===')
     t = time.time()
     path = Path(f'{SRC_DIR}/{version}-{side}-temp.jar')
     cfr = Path(f'./lib/cfr-{CFR_VERSION}.jar')
@@ -393,16 +394,16 @@ def decompile_cfr(decompiled_version, version, side, quiet):
                         "--silent", "true"
                         ], check=True, capture_output=quiet)
         if not quiet:
-            print(f'- Removing -> {version}-{side}-temp.jar')
-            print(f'- Removing -> summary.txt')
+            logging.info(f'- Removing -> {version}-{side}-temp.jar')
+            logging.info(f'- Removing -> summary.txt')
         os.remove(f'{SRC_DIR}/{version}-{side}-temp.jar')
         os.remove(f'{SRC_DIR}/{decompiled_version}/{side}/summary.txt')
         if not quiet:
             t = time.time() - t
-            print('Done in %.1fs' % t)
+            logging.info('Done in %.1fs' % t)
     else:
         if not quiet:
-            print(f'ERROR: Missing files: ./lib/cfr-{CFR_VERSION}.jar or {SRC_DIR}/{version}-{side}-temp.jar')
+            logging.error(f'ERROR: Missing files: ./lib/cfr-{CFR_VERSION}.jar or {SRC_DIR}/{version}-{side}-temp.jar')
             input("Aborting, press anything to exit")
         raise SystemExit(1)
 
@@ -489,7 +490,7 @@ def convert_mappings(version, side, quiet):
                 obf_name = obf_name.split(":")[0]
                 outputFile.write(remap_file_path(obf_name)[1:-1] + " " + remap_file_path(deobf_name)[1:-1] + "\n")
     if not quiet:
-        print("Done !")
+        logging.info("Done !")
 
 
 def make_paths(version, side, removal_bool, force, forceno):
@@ -598,7 +599,7 @@ def download_n_decompile(minecraft_version: str,
                          decompile: bool = True) -> str:
     """
     :param minecraft_version:
-        The version you want to decompile (alid version starting from 19w36a (snapshot) and 1.14.4 (releases))
+        The version you want to decompile (valid version starting from 19w36a (snapshot) and 1.14.4 (releases))
         Use 'snap' for latest snapshot ({snapshot}) or 'latest' for latest version ({latest})
     :param quiet: 
         Doesnt display the messages
@@ -632,21 +633,26 @@ def download_n_decompile(minecraft_version: str,
     """
     check_java()
     snapshot, latest = get_latest_version()
+
     if snapshot is None or latest is None:
-        print("Error getting latest versions, please refresh cache")
+        logging.error("Error getting latest versions, please refresh cache")
         sys.exit(1)
 
     if not quiet:
-        print("Decompiling using official mojang mappings (Default option are in uppercase, you can just enter)")
-    removal_bool = clean
+        logging.info("Decompiling using official mojang mappings (Default option are in uppercase, you can just enter)")
 
+    # This ain't my code
+    removal_bool = clean
     version = minecraft_version
+
     if version is None:
-        print(
+        logging.error(
             "Error you should provide a version with --mcversion <version>, use latest or snap if you dont know which one")
         raise SystemExit(1)
+
     if version in ["snap", "s", "snapshot"]:
         version = snapshot
+
     if version in ["latest", "l"]:
         version = latest
 
@@ -667,8 +673,8 @@ def download_n_decompile(minecraft_version: str,
         else:
             decompile_fern_flower(decompiled_version, version, side, quiet, force)
         if not quiet:
-            print("===FINISHED DECOMPILING===")
-            print(f"output is in {SRC_DIR}/{decompiled_version}")
+            logging.info("===FINISHED DECOMPILING===")
+            logging.info(f"output is in {SRC_DIR}/{decompiled_version}")
             return str(Path(f"{SRC_DIR}/{decompiled_version}").absolute())
         sys.exit(0)
 
@@ -698,7 +704,8 @@ def download_n_decompile(minecraft_version: str,
             decompile_cfr(decompiled_version, version, side, quiet)
         else:
             decompile_fern_flower(decompiled_version, version, side, quiet, force)
+
     if not quiet:
-        print("===FINISHED DECOMPILING===")
-        print(f"output is in {SRC_DIR}/{decompiled_version}")
+        logging.info("===FINISHED DECOMPILING===")
+        logging.info(f"output is in {SRC_DIR}/{decompiled_version}")
         return str(Path(f"{SRC_DIR}/{decompiled_version}").absolute())
