@@ -51,11 +51,18 @@ options:
   --re-download, -rd    Force re-download
   --no-compare, -nc     Skip comparing the decompiled versions
 ```
+If no -l argument is provided, script will try to use `idea64.exe` from path.
 
 Examples
 
-Compare 1.17.1 server src to the latest one\
+Compare 1.17.1 server src to the latest snapshot\
 ```python3 main.py -l C:\Program Files\Jetbrains\apps\PyCharm-P\ch-0\231.8770.66\bin\pycharm64.exe 1.17.1```
+
+Compare 1.17.1 server src to the latest snapshot\
+```python3 main.py -l C:\Program Files\Jetbrains\apps\PyCharm-P\ch-0\231.8770.66\bin\pycharm64.exe 1.17.1 snap```
+
+Compare 1.17.1 server src to the latest full release\
+```python3 main.py -l C:\Program Files\Jetbrains\apps\PyCharm-P\ch-0\231.8770.66\bin\pycharm64.exe 1.17.1 latest```
 
 Compare 1.17.1 server src to 1.17.2\
 ```python3 main.py -l C:\Program Files\Jetbrains\apps\PyCharm-P\ch-0\231.8770.66\bin\pycharm64.exe 1.17.1 1.17.2```
