@@ -56,16 +56,19 @@ If no -l argument is provided, script will try to use `idea64.exe` from path.
 Examples
 
 Compare 1.17.1 server src to the latest snapshot\
-```python3 main.py -l C:\Program Files\Jetbrains\apps\PyCharm-P\ch-0\231.8770.66\bin\pycharm64.exe 1.17.1```
+```python3 main.py -l "C:\Program Files\Jetbrains\apps\IDEA-U\ch-0\241.15989.150\bin\idea64.exe" 1.17.1```
 
 Compare 1.17.1 server src to the latest snapshot\
-```python3 main.py -l C:\Program Files\Jetbrains\apps\PyCharm-P\ch-0\231.8770.66\bin\pycharm64.exe 1.17.1 snap```
+```python3 main.py -l "C:\Program Files\Jetbrains\apps\IDEA-U\ch-0\241.15989.150\bin\idea64.exe" 1.17.1 snap```
 
 Compare 1.17.1 server src to the latest full release\
-```python3 main.py -l C:\Program Files\Jetbrains\apps\PyCharm-P\ch-0\231.8770.66\bin\pycharm64.exe 1.17.1 latest```
+```python3 main.py -l "C:\Program Files\Jetbrains\apps\IDEA-U\ch-0\241.15989.150\bin\idea64.exe" 1.17.1 latest```
 
 Compare 1.17.1 server src to 1.17.2\
-```python3 main.py -l C:\Program Files\Jetbrains\apps\PyCharm-P\ch-0\231.8770.66\bin\pycharm64.exe 1.17.1 1.17.2```
+```python3 main.py -l "C:\Program Files\Jetbrains\apps\IDEA-U\ch-0\241.15989.150\bin\idea64.exe" 1.17.1 1.17.2```
+
+Compare 1.17.1 server src to 1.17.2 using FernFlower\
+```python3 main.py -l "C:\Program Files\Jetbrains\apps\IDEA-U\ch-0\241.15989.150\bin\idea64.exe" -ff 1.17.1 1.17.2```
 
 ---
 

@@ -4,7 +4,17 @@ import os
 import logging
 from pathlib import Path
 
-from decompiler import download_n_decompile, get_latest_version
+from decompiler import download_n_decompile, get_latest_version, Decompiler
+
+
+def download_n_decompile_wrapper(version: str,
+                                 use_fernflower: bool,
+                                 force: bool = False,
+                                 ) -> str:
+    if not use_fernflower:
+        return download_n_decompile(version, force=force)
+    elif use_fernflower:
+        return download_n_decompile(version, force=force, decompiler_type=Decompiler.F)
 
 
 def main():
@@ -20,6 +30,8 @@ def main():
                         help="Force re-download")
     parser.add_argument("--no-compare", "-nc", dest="no_compare", action="store_true", default=False,
                         help="Skip comparing the decompiled versions")
+    parser.add_argument("--fern-flower", "-ff", dest="fern_flower", action="store_true", default=False,
+                        help="Use FernFlower Decompiler instead of CFR")
 
     args = parser.parse_args()
 
@@ -52,14 +64,14 @@ def main():
         logging.info(f"Use --re-download to force re-download")
         version1_path = str(Path(f"./src/{args.version[0]}").absolute())
     else:
-        version1_path = download_n_decompile(args.version[0], force=True)
+        version1_path = download_n_decompile_wrapper(args.version[0], args.fern_flower, force=True)
 
     if Path(f"./src/{args.compare}").exists() and not args.re_download:
         logging.info(f"Version {args.compare} already decompiled. Skipping...")
         logging.info(f"Use --re-download to force re-download")
         version2_path = str(Path(f"./src/{args.compare}").absolute())
     else:
-        version2_path = download_n_decompile(args.compare, force=True)
+        version2_path = download_n_decompile_wrapper(args.compare, args.fern_flower, force=True)
 
     logging.info(f"Comparing {args.version[0]} with {args.compare}")
     logging.info(f"Version 1 Path: {version1_path}")
