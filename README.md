@@ -34,9 +34,7 @@ The `./tmp/` directory can be removed without impact
 **Usage**
 
 ```
-usage: main.py [-h] [--ide-location [IDE_LOCATION]] [--re-download]
-               [--no-compare]
-               version [compare]
+usage: main.py [-h] [--ide-location [IDE_LOCATION]] [--re-download] [--no-compare] [--fern-flower] version [compare]
 
 Decompile and Compare two Minecraft versions
 
@@ -50,6 +48,7 @@ options:
                         Provide JetBrains IDE location or PATH name
   --re-download, -rd    Force re-download
   --no-compare, -nc     Skip comparing the decompiled versions
+  --fern-flower, -ff    Use FernFlower Decompiler instead of CFR
 ```
 If no -l argument is provided, script will try to use `idea64.exe` from path.
 
